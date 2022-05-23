@@ -1,7 +1,8 @@
 CC=g++
+HEADERS=include/
 LIBS=`pkg-config --cflags --libs opencv4`
 
-bin/main: main.cpp
+bin/main: src/main.cpp src/read_MNIST.cpp src/network.cpp
 	mkdir -p $(dir $@)
-	$(CC) $^ -o $@ $(LIBS)
+	$(CC) $^ -I $(HEADERS) -o $@ $(LIBS)
 
