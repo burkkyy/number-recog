@@ -35,8 +35,8 @@ struct network {
 	float* B3;
 };
 
-float sigmoid(float);
-float dsigmoid(float);
+float activation(float);
+float dactivation(float);
 void transfer(float*, float*, float*, float*, int, int);
 void forward_prop(network&);
 void init_net(network&);
