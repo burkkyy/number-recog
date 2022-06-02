@@ -1,8 +1,9 @@
 #ifndef NET_H
 #define NET_H
 
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
+//#include <opencv2/highgui.hpp>
+//#include <opencv2/imgproc.hpp>
+#include "matrix.hpp"
 
 #define TRAIN_IMAGES "resources/train/images"
 #define TRAIN_LABELS "resources/train/labels"
@@ -11,37 +12,41 @@
 
 #define INPUT_LAYER 784
 #define Z1_LAYER 12
-#define Z2_LAYER 12
+//#define Z2_LAYER 12
 #define OUTPUT_LAYER 10
+
+#define LEARNING_RATE 0.01
 
 #define P(x) std::cout << x << std::endl
 
 struct network {
-	float* A0;
+	mat* A0;
 	
-	float* Z1;
-	float* A1;
-	float* W1;
-	float* B1;
+	mat* W1;
+	mat* B1;
+	mat* Z1;
+	mat* A1;
 
-	float* Z2;
-	float* A2;
-	float* W2;
-	float* B2;
+	mat* W2;
+	mat* B2;
+	mat* Z2;
+	mat* A2;
 	
+	/*
 	float* Z3;
 	float* A3;
 	float* W3;
 	float* B3;
+	*/
 };
 
-float activation(float);
-float dactivation(float);
-void transfer(float*, float*, float*, float*, int, int);
+void ncreate(network&);
+void nfree(network&);
+void nrand(network&);
+void ntrain(network&, char**, char*, int);
 void forward_prop(network&);
-void init_net(network&);
 void print_output(network&);
-void back_prop(network&, float*&);
+void back_prop(network&, double);
 
 #endif
 
