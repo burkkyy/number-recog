@@ -80,15 +80,18 @@ void mrand(mat*& m){
 	}
 }
 
-void msave(char* filename, mat*& m){
+void msave(const char* filename, mat*& m){
 	std::ofstream file(filename, std::ios::out);
-	
+	std::cout << "rows: " << m->rows << std::endl;	
 	file << m->rows;
+	file << " ";
+	std::cout << "cols: " << m->cols << std::endl;
 	file << m->cols;
-
+	file << "\n";
 	for(int i = 0; i < m->rows; i++){
-		for(int j; j < m->cols; j++){
+		for(int j = 0; j < m->cols; j++){
 			file << m->elements[i][j];
+			file << " ";
 		}
 		file << "\n";
 	}
@@ -96,7 +99,7 @@ void msave(char* filename, mat*& m){
 	file.close();
 }
 
-mat* mload(char* filename){
+mat* mload(const char* filename){
 	std::ifstream file(filename, std::ios::in);
 	
 	int rows, cols;
@@ -104,7 +107,7 @@ mat* mload(char* filename){
 	file >> cols;
 	
 	mat* m = mcreate(rows, cols);
-	double temp = 0.0f;
+	double temp = 0.0;
 
 	for(int i = 0; i < rows; i++){
 		for(int j = 0; j < cols; j++){

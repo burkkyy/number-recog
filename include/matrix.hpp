@@ -26,8 +26,8 @@ void mprint(mat*&);
 void mfill(mat*&, int);
 void mrand(mat*&);
 
-void msave(char*, mat*&);
-mat* mload(char*);
+void msave(const char*, mat*&);
+mat* mload(const char*);
 
 // matrix operations
 mat* multiply(mat*&, mat*&);

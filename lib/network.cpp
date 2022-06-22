@@ -78,9 +78,9 @@ void update_net(network& net){
 
 void ntrain(network& net, char** images, char* labels, int itter){
 	int guess = 0;
-	double correct = 0;
+	double correct = 0, acc = 0;
 
-	for(int epoch = 0; epoch < 201; epoch++){
+	for(int epoch = 0; epoch < 100; epoch++){
 		for(int i = 0; i < itter; i++){
 			for(int j = 0; j < INPUT_LAYER; j++){
 				net.A0->elements[j][0] = images[i][j];
@@ -90,18 +90,15 @@ void ntrain(network& net, char** images, char* labels, int itter){
 			hot_encode_y(net, (int)(labels[i]));
 			back_prop(net);
 			
-			for(int k = 0; k < 10; k++){
-				if(net.A2->elements[guess][0] < net.A2->elements[k][0]){
-					guess = k;
-				}
-			}
-
-			if(guess == (int)labels[i]){ correct++; } guess = 0;
+			guess = argmax(net);
+			if(guess == (int)labels[i]){ correct++; }
 		}
+
 		if(epoch % 10 == 0){
+			acc = correct / itter * 10;
 			P("----------");
 			P("epoch: " << epoch);
-			P("Accuracy: " << correct / itter * 10 << "%");
+			P("Accuracy: " << acc << "%");
 			correct = 0;
 		}
 	}
@@ -117,10 +114,7 @@ void ntest(network& net, char** images, char* labels, int itter){
 		
 		forward_prop(net);
 		
-		guess = 0;
-		for(int j = 1; j < 10; j++){
-			if(net.A2->elements[guess][0] < net.A2->elements[j][0]){ guess = j; }
-		}
+		guess = argmax(net);
 		if(guess == (int)labels[i]){ correct++; }
 
 		// P("network guess: " << guess << " Actual " << (int)labels[i]);

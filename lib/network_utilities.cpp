@@ -43,6 +43,16 @@ void softmax(network& net){
 	}
 }
 
+int argmax(network& net){
+	int max = 0;
+	for(int i = 0; i < net.A2->rows; i++){
+		if(net.A2->elements[max][0] < net.A2->elements[i][0]){
+			max = i;
+		}
+	}
+	return max;
+}
+
 void print_output(network& net){
 	for(int i = 0; i < OUTPUT_LAYER; i++){
 		std::cout << "Output Layer[" << i << "]: " << net.A2->elements[i][0] << std::endl;
@@ -113,5 +123,25 @@ void nrand(network& net){
 	//mrand(net.B1);
 	mrand(net.W2);
 	//mrand(net.B2);
+}
+
+void nsave(network& net){
+	msave(W1_FILE, net.W1);
+	msave(B1_FILE, net.B1);
+	msave(W2_FILE, net.W2);
+	msave(B2_FILE, net.B2);
+}
+
+// do not all if network already has memory allocated
+void nload(network& net){
+	ncreate(net, INPUT_LAYER);
+	mfree(net.W1);
+	mfree(net.B1);
+	mfree(net.W2);
+	mfree(net.B2);
+	net.W1 = mload(W1_FILE);
+	net.B1 = mload(B1_FILE);
+	net.W2 = mload(W2_FILE);
+	net.B2 = mload(B2_FILE);
 }
 
