@@ -3,6 +3,7 @@
 
 //#include <opencv2/highgui.hpp>
 //#include <opencv2/imgproc.hpp>
+#include <math.h>
 #include "matrix.hpp"
 
 #define TRAIN_IMAGES "resources/train/images"
@@ -11,11 +12,9 @@
 #define TEST_LABELS "resources/test/labels"
 
 #define INPUT_LAYER 784
-#define Z1_LAYER 12
-//#define Z2_LAYER 12
+#define Z1_LAYER 40
 #define OUTPUT_LAYER 10
-
-#define LEARNING_RATE 0.01
+#define LEARNING_RATE 0.1
 
 #define P(x) std::cout << x << std::endl
 
@@ -31,22 +30,38 @@ struct network {
 	mat* B2;
 	mat* Z2;
 	mat* A2;
-	
-	/*
-	float* Z3;
-	float* A3;
-	float* W3;
-	float* B3;
-	*/
+
+	mat* dW1;
+	mat* dB1;
+	mat* dW2;
+	mat* dB2;
+	mat* Y;
 };
 
-void ncreate(network&);
+double ReLU(double);
+double dReLU(double);
+
+double sigmoid(double);
+double dsigmoid(double);
+
+void softmax(network&);
+
+double cost(network&);
+double dcost(network&, int);
+
+void hot_encode_y(network&, int);
+
+void ncreate(network&, int);
 void nfree(network&);
 void nrand(network&);
-void ntrain(network&, char**, char*, int);
+
 void forward_prop(network&);
+void back_prop(network&);
+void update_net(network&);
 void print_output(network&);
-void back_prop(network&, double);
+
+void ntrain(network&, char**, char*, int);
+void ntest(network&, char**, char*, int);
 
 #endif
 

@@ -1,217 +1,130 @@
 #include "network.hpp"
-#include "matrix.hpp"
-#include "read_MNIST.hpp"
-
-// ReLU
-double ReLU(double x){
-	if(x > 0){
-		return x;
-	}
-	return 0;
-}
-
-// derivative of ReLU
-double dReLU(double x){
-	if(x > 0){
-		return 1;
-	}
-	return 0;
-}
-
-// sigmoid
-double sigmoid(double x){
-	return 0.5f * (x / (1.0f + abs(x)) + 1.0f);
-}
-
-// derivative of sigmoid
-double dsigmoid(double x){
-	return sigmoid(x) * (1.0f - sigmoid(x));
-}
 
 void forward_prop(network& net){
-	// set input layer
-	//mfree(net.A0);
-	//net.A0 = input;
+	apply_func(sigmoid, net.A0, net.A0);
+	
+	mat* temp1 = dot(net.W1, net.A0);
+	add(net.B1, temp1, net.Z1);
+	apply_func(sigmoid, net.Z1, net.A1);
 
-	mat* temp;
-	
-	// apply weights
-	temp = dot(net.W1, net.A0);
-	mmove(net.Z1, temp);
-	mfree(temp);
-	
-	// apply biases
-	temp = add(net.Z1, net.B1);
-	mmove(net.Z1, temp);
-	mfree(temp);
-	
-	// apply activation func
-	temp = apply_func(sigmoid, net.Z1);
-	mmove(net.A1, temp);
-	mfree(temp);
-	
-	// apply weights
-	temp = dot(net.W2, net.A1);
-	mmove(net.Z2, temp);
-	mfree(temp);
+	mat* temp2 = dot(net.W2, net.A1);
+	add(net.B2, temp2, net.Z2);
+	apply_func(sigmoid, net.Z2, net.A2);
+	//softmax(net);
 
-	// apply biases
-	temp = add(net.Z2, net.B2);
-	mmove(net.Z2, temp);
-	mfree(temp);
-
-	// apply activation func
-	temp = apply_func(sigmoid, net.Z2);
-	mmove(net.A2, temp);
-	mfree(temp);
+	mfree(temp1);
+	mfree(temp2);
 }
 
-void print_output(network& net){
-	for(int i = 0; i < OUTPUT_LAYER; i++){
-		std::cout << "Output Layer[" << i << "]: " << net.A2->elements[i][0] << std::endl;
-	}
-}
-
-double cost(network& net, mat*& Y){
-	double cost = 0;
-	for(int i = 0; i < OUTPUT_LAYER; i++){
-		cost += (net.A2->elements[i][0] - Y->elements[i][0]) * (net.A2->elements[i][0] - Y->elements[i][0]);
-	}
-	return cost / 2;
-}
-
-double dcost(network& net, mat*& Y, int i){
-	return net.A2->elements[i][0] - Y->elements[i][0];
-}
-
-void back_prop(network& net, double Y){
-	/*
-	P("W1 " << net.W1->rows << " " << net.W1->cols);
-	P("W2 " << net.W2->rows << " " << net.W2->cols);
-	P("A1 " << net.A1->rows << " " << net.A1->cols);
-	P("A2 " << net.A2->rows << " " << net.A2->cols);
-	*/
-
-	mat* one_hot_y = mcreate(10, 1);
-	one_hot_y->elements[(int)Y][0] = 1;
+void back_prop(network& net){
+	// output layer
+	mat* delta_A2 = sub(net.A2, net.Y);
+	mat* A1_trans = transpose(net.A1);
 	
-	mat* dW2 = mcreate(net.W2->rows, net.W2->cols);
-	for(int i = 0; i < dW2->rows; i++){
-		for(int j = 0; j < dW2->cols; j++){
-			/* debugging helper code
-			P(i << " " << j);
-			P(dcost(net, one_hot_y, i));
-			P(dsigmoid(net.Z2->elements[i][0]));
-			P(net.A1->elements[j][0]);
-			P("=======");
-			*/
-			dW2->elements[i][j] = \
-					      dcost(net, one_hot_y, i) *\
-					      dsigmoid(net.Z2->elements[i][0]) *\
-					      net.A1->elements[j][0];
-		}
-	}
+	dot(delta_A2, A1_trans, net.dW2);
+	scale(LEARNING_RATE, net.dW2, net.dW2);
+	sub(net.W2, net.dW2, net.W2);
+	
+	scale(LEARNING_RATE, delta_A2, net.dB2);
+	sub(net.B2, net.dB2, net.B2);
+	
+	// input layer
+	mat* dactivation = mcopy(net.A1);
+	mfill(dactivation, 1);
+	sub(dactivation, net.A1, dactivation);
+	multiply(dactivation, net.A1, dactivation);
+	
+	mat* W2_trans = transpose(net.W2);
+	mat* delta_A1 = dot(W2_trans, delta_A2);
+	multiply(delta_A1, dactivation, delta_A1);
 
-	mat* dB2 = mcreate(net.B2->rows, net.B1->cols);
-	for(int i = 0; i < dB2->rows; i++){
-		dB2->elements[i][0] = \
-				      dcost(net, one_hot_y, i) *\
-				      dsigmoid(net.Z2->elements[i][0]);	
-	}
+	mat* A0_trans = transpose(net.A0);
+	
+	dot(delta_A1, A0_trans, net.dW1);
+	scale(LEARNING_RATE, net.dW1, net.dW1);
+	sub(net.W1, net.dW1, net.W1);
 
-	mat* dW1 = mcreate(net.W1->rows, net.W1->cols);
-	for(int i = 0; i < dW1->rows; i++){
-		for(int j = 0; j < dW1->cols; j++){
-			for(int k = 0; k < OUTPUT_LAYER; k++){
-				dW1->elements[i][j] += \
-						       dcost(net, one_hot_y, k) *\
-						       dsigmoid(net.Z2->elements[k][0]) *\
-						       net.W2->elements[k][i] *\
-						       dsigmoid(net.Z1->elements[i][0]) *\
-						       net.A1->elements[i][0];		
-			}
-		}
-	}
+	add(net.dB1, delta_A1, net.dB1);
+	scale(LEARNING_RATE, net.dB1, net.dB1);
+	sub(net.B1, net.dB1, net.B1);
+	
+	// memory clean up
+	mfree(delta_A2);
+	mfree(A1_trans);
+	
+	mfree(dactivation);
+	mfree(W2_trans);
+	mfree(delta_A1);
+	mfree(A0_trans);
+}
 
-	mat* dB1 = mcreate(net.B1->rows, net.B1->cols);
-	for(int i = 0; i < dB1->rows; i++){
-		for(int j = 0; j < OUTPUT_LAYER; j++){
-			dB1->elements[i][0] = \
-					      dcost(net, one_hot_y, j) *\
-					      dsigmoid(net.Z2->elements[j][0]) *\
-					      net.W2->elements[j][i] *\
-					      dsigmoid(net.Z1->elements[i][0]);
-		}
-	}
+void update_net(network& net){
+	scale(LEARNING_RATE, net.dW2, net.dW2);
+	sub(net.W2, net.dW2, net.W2);
+	mfill(net.dW2, 0);
 
-	for(int i = 0; i < net.W2->rows; i++){
-		for(int j = 0; j < dW2->cols; j++){
-			net.W2->elements[i][j] -= dW2->elements[i][j] * LEARNING_RATE;
-		}
-	}
+	scale(LEARNING_RATE, net.dB2, net.dB2);
+	sub(net.B2, net.dB2, net.B2);
+	mfill(net.dB2, 0);
 
-	for(int i = 0; i < net.B2->rows; i++){
-		net.B2->elements[i][0] -= dB2->elements[i][0] * LEARNING_RATE;
-	}
+	scale(LEARNING_RATE, net.dW1, net.dW1);
+	sub(net.W1, net.dW1, net.W1);
+	mfill(net.dW1, 0);
 
-	for(int i = 0; i < net.W1->rows; i++){
-		for(int j = 0; j < net.W1->cols; j++){
-			net.W1->elements[i][j] -= dW1->elements[i][j] * LEARNING_RATE;
-		}
-	}
-
-	for(int i = 0; i < net.B1->rows; i++){
-		net.B1->elements[i][0] -= dB1->elements[i][0] * LEARNING_RATE;
-	}
-
-	mfree(one_hot_y);
-	mfree(dW2);
-	mfree(dB2);
-	mfree(dW1);
-	mfree(dB1);
+	scale(LEARNING_RATE, net.dB1, net.dB1);
+	sub(net.B1, net.dB1, net.B1);
+	mfill(net.dB1, 0);
 }
 
 void ntrain(network& net, char** images, char* labels, int itter){
+	int guess = 0;
+	double correct = 0;
+
+	for(int epoch = 0; epoch < 201; epoch++){
+		for(int i = 0; i < itter; i++){
+			for(int j = 0; j < INPUT_LAYER; j++){
+				net.A0->elements[j][0] = images[i][j];
+			}
+
+			forward_prop(net);
+			hot_encode_y(net, (int)(labels[i]));
+			back_prop(net);
+			
+			for(int k = 0; k < 10; k++){
+				if(net.A2->elements[guess][0] < net.A2->elements[k][0]){
+					guess = k;
+				}
+			}
+
+			if(guess == (int)labels[i]){ correct++; } guess = 0;
+		}
+		if(epoch % 10 == 0){
+			P("----------");
+			P("epoch: " << epoch);
+			P("Accuracy: " << correct / itter * 10 << "%");
+			correct = 0;
+		}
+	}
+}
+
+void ntest(network& net, char** images, char* labels, int itter){
+	int guess = 0;
+	int correct = 0;
 	for(int i = 0; i < itter; i++){
 		for(int j = 0; j < INPUT_LAYER; j++){
 			net.A0->elements[j][0] = images[i][j];
 		}
+		
 		forward_prop(net);
-		back_prop(net, (double)(labels[i]));	
+		
+		guess = 0;
+		for(int j = 1; j < 10; j++){
+			if(net.A2->elements[guess][0] < net.A2->elements[j][0]){ guess = j; }
+		}
+		if(guess == (int)labels[i]){ correct++; }
+
+		// P("network guess: " << guess << " Actual " << (int)labels[i]);
 	}
-}
-
-
-void ncreate(network& net){
-	net.A0 = mcreate(INPUT_LAYER, 1);
-	
-	net.W1 = mcreate(Z1_LAYER, INPUT_LAYER);
-	net.B1 = mcreate(Z1_LAYER, 1);
-	net.Z1 = mcreate(Z1_LAYER, 1);
-	net.A1 = mcreate(Z1_LAYER, 1);
-	
-	net.W2 = mcreate(OUTPUT_LAYER, Z1_LAYER);
-	net.B2 = mcreate(OUTPUT_LAYER, 1);
-	net.Z2 = mcreate(OUTPUT_LAYER, 1);
-	net.A2 = mcreate(OUTPUT_LAYER, 1);
-}
-
-void nfree(network& net){
-	mfree(net.A0);
-	
-	mfree(net.W1);
-	mfree(net.B1);
-	mfree(net.Z1);
-	mfree(net.A1);
-	
-	mfree(net.W2);
-	mfree(net.B2);
-	mfree(net.Z2);
-	mfree(net.A2);
-}
-
-void nrand(network& net){
-	mrand(net.W1);
-	mrand(net.W2);
+	P("Out of " << itter << " guesses, the network got " << correct << " correct");
 }
 

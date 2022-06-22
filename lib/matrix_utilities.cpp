@@ -14,7 +14,8 @@ void mfree(mat* m){
 	for(int i = 0; i < m->rows; i++){
 		delete[] m->elements[i];
 	}
-	delete[] m;
+	delete[] m->elements;
+	delete m;
 	m = nullptr;
 }
 
@@ -61,12 +62,20 @@ void mfill(mat*& m, int n){
 
 void mrand(mat*& m){
 	// set rand() seed
-	//srand(NULL);
+	//srand(NULL); // set the seed according to the sys time
 	srand(RAND_SEED);
 
+	/* set the matrix values to a random value in a range
 	for(int i = 0; i < m->rows; i++){
 		for(int j = 0; j < m->cols; j++){
 			m->elements[i][j] = (double)(rand() % (2 * RAND_RANGE * RAND_SCALE) / RAND_SCALE) - RAND_RANGE;
+		}
+	}
+	*/
+	
+	for(int i = 0; i < m->rows; i++){
+		for(int j = 0; j < m->cols; j++){
+			m->elements[i][j] = (double)(rand()) / (double)(RAND_MAX / 2.0) - 1.0;
 		}
 	}
 }
@@ -81,6 +90,7 @@ void msave(char* filename, mat*& m){
 		for(int j; j < m->cols; j++){
 			file << m->elements[i][j];
 		}
+		file << "\n";
 	}
 	
 	file.close();

@@ -82,7 +82,7 @@ mat* scale(double num, mat*& m){
 	return matrix;
 }
 
-mat* add_scale(double num, mat*& m){
+mat* add_scalar(double num, mat*& m){
 	mat* matrix = mcopy(m);
 	for(int i = 0; i < m->rows; i++){
 		for(int j = 0; j < m->cols; j++){
@@ -110,5 +110,82 @@ mat* apply_func(double(*func)(double), mat* m){
 		}
 	}
 	return matrix;
+}
+
+void multiply(mat*& a, mat*& b, mat*& buff){
+	if(mcheck(a, b)){
+		for(int i = 0; i < a->rows; i++){
+			for(int j = 0; j < b->cols; j++){
+				buff->elements[i][j] = a->elements[i][j] * b->elements[i][j];
+			}
+		}
+	} else {
+		std::cout << "Dimensions do not align" << std::endl;
+	}
+}
+
+void add(mat*& a, mat*& b, mat*& buff){
+	if(mcheck(a, b) && mcheck(a, buff)){
+		for(int i = 0; i < a->rows; i++){
+			for(int j = 0; j < b->cols; j++){
+				buff->elements[i][j] = a->elements[i][j] + b->elements[i][j];
+			}
+		}
+	} else {
+		std::cout << "Dimensions do not align" << std::endl;
+	}
+}
+
+void sub(mat*& a, mat*& b, mat*& buff){
+	if(mcheck(a, b)){
+		for(int i = 0; i < a->rows; i++){
+			for(int j = 0; j < b->cols; j++){
+				buff->elements[i][j] = a->elements[i][j] - b->elements[i][j];
+			}
+		}
+	} else {
+		std::cout << "Dimensions do not align" << std::endl;
+	}
+}
+
+void dot(mat*& a, mat*& b, mat*& buff){
+	if(a->cols == b->rows){
+		double sum = 0;
+		for(int i = 0; i < a->rows; i++){
+			for(int j = 0; j < b->cols; j++){
+				sum = 0;
+				for(int k = 0; k < b->rows; k++){
+					sum += a->elements[i][k] * b->elements[k][j];
+				}
+				buff->elements[i][j] = sum;
+			}
+		}
+	} else {
+		std::cout << "Dimensions do not align" << std::endl;
+	}
+}
+
+void scale(double num, mat*& m, mat*& buff){
+	for(int i = 0; i < m->rows; i++){
+		for(int j = 0; j < m->cols; j++){
+			buff->elements[i][j] = m->elements[i][j] * num;
+		}
+	}
+}
+
+void transpose(mat*& m, mat*& buff){
+	for(int i = 0; i < m->rows; i++){
+		for(int j = 0; j < m->cols; j++){
+			buff->elements[j][i] = m->elements[i][j];
+		}
+	}
+}
+
+void apply_func(double(*func)(double), mat* m, mat*& buff){
+	for(int i = 0; i < m->rows; i++){
+		for(int j = 0; j < m->cols; j++){
+			buff->elements[i][j] = (*func)(m->elements[i][j]);
+		}
+	}
 }
 
