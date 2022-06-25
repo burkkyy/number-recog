@@ -38,7 +38,7 @@ based on the structure of the input rather than the pixel values.
 But guessing numbers is lame. Next project will implement a CNN for a 
 facial recognition library 
 
-Reasources
+Resources
 ----------
 - (All the math you need to know) https://explained.ai/matrix-calculus/
 - (opencv for linux) https://docs.opencv.org/4.x/d7/d9f/tutorial_linux_install.html
