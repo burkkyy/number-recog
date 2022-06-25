@@ -9,10 +9,12 @@ Compliling
 If you wish to use the gui, before compliling be sure to include the opencv library.
 To compile simply run: make all
 
-How to run
-----------
-- To train simply run: bin/train
-- To draw and guess numbers run: bin/gui
+How to
+------
+- Binaries are stored in bin/
+- What each binary does should be clear from the name
+- When train is done running, data from the network in saved in data/
+- Functions are provided to save, load and interact with the network
 
 How it works?
 -------------
