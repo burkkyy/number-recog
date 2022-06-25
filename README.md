@@ -6,8 +6,8 @@ as a way to visually interact with the program
 
 Compliling
 ----------
-If you wish to use the gui, before compliling be sure to include the opencv library
-To compile run: make all
+If you wish to use the gui, before compliling be sure to include the opencv library.
+To compile simply run: make all
 
 How to run
 ----------
