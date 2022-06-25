@@ -50,3 +50,4 @@ I HIGHLY recommend 3blue1brown: https://www.youtube.com/watch?v=aircAruvnKk&t=10
 
 Screenshot
 ----------
+![FIrstNeuralNet](https://user-images.githubusercontent.com/46787561/175752971-bf3f7ff9-7884-471a-8c82-2ca11367de9d.png)
