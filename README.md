@@ -1,5 +1,3 @@
-Calebs number recognition software made from scrath in cpp!
-
 What is this?
 -----------
 This is a number recognition software made from scrath in cpp. 
