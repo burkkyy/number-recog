@@ -14,7 +14,7 @@
 #define B2_FILE "data/b2.data"
 
 #define INPUT_LAYER 784
-#define Z1_LAYER 50
+#define Z1_LAYER 30
 #define OUTPUT_LAYER 10
 #define LEARNING_RATE 0.01
 

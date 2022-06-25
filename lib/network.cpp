@@ -1,6 +1,12 @@
 #include "network.hpp"
 
 void forward_prop(network& net){
+	for(int i = 0; i < 784; i++){
+		if(net.A0->elements[i][0] < 0){
+			net.A0->elements[i][0] += 255;
+		}
+	}
+
 	apply_func(sigmoid, net.A0, net.A0);
 	
 	mat* temp1 = dot(net.W1, net.A0);
