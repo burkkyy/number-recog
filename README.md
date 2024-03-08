@@ -1,13 +1,15 @@
 What is this?
 -----------
 This is a number recognition software made from scrath in cpp. 
-No External libraries are used apart from opencv which is only used 
-as a way to visually interact with the program
+No external libraries are used apart from opencv which is only used 
+as a way to visually interact with the program.
 
 Compliling
 ----------
 If you wish to use the gui, before compliling be sure to include the opencv library.
-To compile simply run: make all
+```bash
+make all
+```
 
 How to
 ------
@@ -25,18 +27,15 @@ out what number it thinks it is between 0 - 9. Training the network
 is done through a process called backpropagation, which is just 
 gradient descent on steroids.
 
-The bad and soon to be good
+Future Plans
 ---------------------------
 Even though the program is 95% accurate with training and 92% accurate 
-with testing data, this approach sucks balls. The neural network is 
-very limited on what data can be inputted in, and what it can be used 
-for. It also sucks at predicting numbers drawn outside of the center of 
+with testing data, this approach is not ideal. The network is 
+very limited on what data can be inputted and what it can be used 
+for. The network is poor at predicting numbers drawn outside of the center of 
 the 28x28 grid. To amend this, we can change the progam to run an input 
 image through a CNN(Convolutional Neural Network) and predict the number 
 based on the structure of the input rather than the pixel values.
-
-But guessing numbers is lame. Next project will implement a CNN for a 
-facial recognition library 
 
 Resources
 ----------
@@ -44,9 +43,7 @@ Resources
 - (opencv for linux) https://docs.opencv.org/4.x/d7/d9f/tutorial_linux_install.html
 - (opencv for windows) https://opencv.org/releases/
 - (MNIST database) http://yann.lecun.com/exdb/mnist/
-
-If you dont know what a neural network even is and you dont like reading scholar write ups, 
-I HIGHLY recommend 3blue1brown: https://www.youtube.com/watch?v=aircAruvnKk&t=1037s
+- https://www.youtube.com/watch?v=aircAruvnKk&t=1037s
 
 Screenshot
 ----------
